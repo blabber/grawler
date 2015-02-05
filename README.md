@@ -63,7 +63,7 @@ This graph was generated using the following commands:
 	sfdp -Tsvg -o graphs/raw.svg results/grawler.dot
 
 <a href="./graphs/raw.svg" target="_blank">
-	<img src="./graphs/raw.svg" style="width: 500px;"/>
+	<img src="./graphs/raw_thumb.png"/>
 </a>
 
 ##### All identified gopherholes, unresponsive ones colored red
@@ -74,7 +74,7 @@ This graph was generated using the following commands:
 		sfdp -Tsvg -Goverlap=false -Gsplines=true -o graphs/colored.svg
 
 <a href="./graphs/colored.svg" target="_blank">
-	<img src="./graphs/colored.svg" style="width: 500px;"/>
+	<img src="./graphs/colored_thumb.png"/>
 </a>
 
 ##### All responsive gopherholes
@@ -85,6 +85,6 @@ This graph was generated using the following commands:
 		sfdp -Tsvg -Goverlap=false -Gsplines=true -o graphs/alive.svg
 
 <a href="./graphs/alive.svg" target="_blank">
-	<img src="./graphs/alive.svg" style="width: 500px;"/>
+	<img src="./graphs/alive_thumb.png"/>
 </a>
 
