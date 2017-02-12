@@ -180,7 +180,17 @@ func ResourceCrawler(o ResourceOpener, r *Resource, out chan<- *CrawlFinding) er
 
 	scan := bufio.NewScanner(rc)
 	for scan.Scan() {
-		if len(scan.Bytes()) > 1 && scan.Bytes()[0] == byte(DirectoryType) {
+		if len(scan.Bytes()) == 1 && scan.Bytes()[0] == '.' {
+			// This is the end marker of the directory listing.
+			break
+		}
+
+		res, err := NewResourceFromGopherLine(scan.Text())
+		if err != nil {
+			return err
+		}
+
+		if res.Type == DirectoryType {
 			// Yep, it is a directory item
 			res, err := NewResourceFromGopherLine(scan.Text())
 			if err != nil {
