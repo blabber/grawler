@@ -58,6 +58,7 @@ var newResourceFromGopherLineTests = []struct {
 	{"1A directory\t/Dir/Selector\tlocalhost\t70", "gopher://localhost:70/1/Dir/Selector", false},
 	{"1A directory\t/Dir/Selector\tlocalhost\t70\t+", "gopher://localhost:70/1/Dir/Selector", false},
 	{"2File\tFileselector\tgopher.example.com\t72", "gopher://gopher.example.com:72/2Fileselector", false},
+	{"2File\tFile selector\tgopher.example.com\t72", "gopher://gopher.example.com:72/2File%20selector", false},
 	// Malformed gopher lines
 	{"1Too many fields\t/Directory/Selector\tlocalhost\t70\tDerp", "", true},
 	{"1Too many fields\t/Directory/Selector\tlocalhost\t70\tHerp\tDerp", "", true},

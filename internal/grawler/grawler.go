@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -107,7 +108,8 @@ func (r *Resource) String() string {
 	if s == "/" {
 		s = ""
 	}
-	return fmt.Sprintf("gopher://%v/%v%s", r.Host, r.Type, s)
+	u, _ := url.Parse(fmt.Sprintf("gopher://%v/%v%s", r.Host, r.Type, s))
+	return u.String()
 }
 
 // CrawlFinding represents a reference to another Resource found by a crawler,
@@ -125,6 +127,7 @@ func (f *CrawlFinding) String() string {
 	if f.Parent == nil {
 		return fmt.Sprintf(`"%v"`, f.Resource.Host)
 	}
+
 	return fmt.Sprintf(`"%v" -> "%v"`, f.Parent, f.Resource.Host)
 }
 
