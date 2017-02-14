@@ -165,14 +165,18 @@ func NetResourceOpener(r *Resource) (io.ReadCloser, error) {
 	return conn, nil
 }
 
+// ItemActionFunc is a function that can be called by ResourceCrawler for items
+// that are neither informational texts nor error messages.
+type ItemActionFunc func(Resource)
+
 // ResourceCrawler crawls a gopher menz. It uses ResourceOpener o to get access
 // to a a Resource r that is expected to be of type DirectoryType. It then looks
 // for references to other directories and reports its findings via the out
 // channel.
 //
-// If ia is not null it points to a function that is called for every Resource in the
+// If ItemAction are passed, they are called for every Resource in the
 // directory that is not a InformationalMessageType or ErrorMessageType.
-func ResourceCrawler(o ResourceOpener, r *Resource, out chan<- *CrawlFinding, ia *func(Resource)) error {
+func ResourceCrawler(o ResourceOpener, r *Resource, out chan<- *CrawlFinding, ia ...ItemActionFunc) error {
 	if r.Type != DirectoryType {
 		return fmt.Errorf("Resource is not a directory: %v", r)
 	}
@@ -196,8 +200,8 @@ func ResourceCrawler(o ResourceOpener, r *Resource, out chan<- *CrawlFinding, ia
 		}
 
 		if res.Type != InformationalMessageType && res.Type != ErrorMessageType {
-			if ia != nil {
-				(*ia)(*res)
+			for _, a := range ia {
+				a(*res)
 			}
 		}
 

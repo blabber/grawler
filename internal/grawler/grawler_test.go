@@ -190,13 +190,13 @@ func TestResourceCrawler(t *testing.T) {
 	}()
 
 	r := &Resource{&Host{"example.com", "70"}, '2', "/"}
-	err := ResourceCrawler(mockResourceOpener, r, findings, nil)
+	err := ResourceCrawler(mockResourceOpener, r, findings)
 	if err == nil {
 		t.Errorf("Resource is not a directory but no error occured: %v", r)
 	}
 
 	r = &Resource{&Host{"localhost", "70"}, DirectoryType, "/"}
-	err = ResourceCrawler(mockResourceOpener, r, findings, nil)
+	err = ResourceCrawler(mockResourceOpener, r, findings)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -231,12 +231,12 @@ func TestItemAction(t *testing.T) {
 	}()
 
 	iaSet := make(map[string]bool)
-	ia := func(r Resource) {
+	ia := ItemActionFunc(func(r Resource) {
 		iaSet[r.String()] = true
-	}
+	})
 
 	r := &Resource{&Host{"localhost", "70"}, DirectoryType, "/"}
-	err := ResourceCrawler(mockResourceOpener, r, findings, &ia)
+	err := ResourceCrawler(mockResourceOpener, r, findings, ia)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
