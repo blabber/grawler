@@ -18,10 +18,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/blabber/grawler/internal/grawler"
@@ -59,11 +61,29 @@ func main() {
 	flagCrawlers := flag.Int("crawlers", runtime.NumCPU(), "the number of crawlers to run concurrently")
 	flagDotfile := flag.String("dotfile", "grawler.dot", "the output file")
 	flagLogfile := flag.String("logfile", "", "the log file (empty for stderr)")
+	flagItemsLogfile := flag.String("ilogfile", "", "the log file for items (\"-\" for stdout), empty to disable item logging")
 	flag.Parse()
 
 	// Setup logging
 	if *flagLogfile != "" {
 		log.SetOutput(mustCreateFile(*flagLogfile))
+	}
+
+	// Setup item log
+	var itemActions []grawler.ItemActionFunc
+
+	if *flagItemsLogfile != "" {
+		f := os.Stdout
+		if *flagItemsLogfile != "-" {
+			f = mustCreateFile(*flagItemsLogfile)
+		}
+
+		var mtx sync.Mutex
+		itemActions = append(itemActions, func(r grawler.Resource) {
+			mtx.Lock()
+			fmt.Fprintf(f, "%s\n", r.String())
+			mtx.Unlock()
+		})
 	}
 
 	// Create Coordinator
@@ -122,7 +142,7 @@ func main() {
 				}
 
 				log.Printf("[%d] Crawling %v", i, j)
-				err := grawler.ResourceCrawler(grawler.NetResourceOpener, j, findings)
+				err := grawler.ResourceCrawler(grawler.NetResourceOpener, j, findings, itemActions...)
 				if err != nil {
 					log.Printf("[%d] ERR: %v", i, err)
 				}
