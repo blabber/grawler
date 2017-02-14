@@ -169,6 +169,8 @@ func mockResourceOpener(r *Resource) (io.ReadCloser, error) {
 	s += "1Give me what you got\t\tlocalhost\t70\r\n"
 	s += "2Afile\tfile\tlocalhost\t70\r\n"
 	s += "1Another directory\t/directory\texample.com\t72\r\n"
+	s += "iAn informational text\t\texample.com\t72\r\n"
+	s += "3An error message\t\texample.com\t72\r\n"
 	s += "."
 
 	return newStringReadCloser(s), nil
@@ -188,13 +190,13 @@ func TestResourceCrawler(t *testing.T) {
 	}()
 
 	r := &Resource{&Host{"example.com", "70"}, '2', "/"}
-	err := ResourceCrawler(mockResourceOpener, r, findings)
+	err := ResourceCrawler(mockResourceOpener, r, findings, nil)
 	if err == nil {
 		t.Errorf("Resource is not a directory but no error occured: %v", r)
 	}
 
 	r = &Resource{&Host{"localhost", "70"}, DirectoryType, "/"}
-	err = ResourceCrawler(mockResourceOpener, r, findings)
+	err = ResourceCrawler(mockResourceOpener, r, findings, nil)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -215,6 +217,47 @@ func TestResourceCrawler(t *testing.T) {
 
 	if len(findingSet) > len(expected) {
 		t.Fatalf("Too many findings: %v", findingSet)
+	}
+}
+
+func TestItemAction(t *testing.T) {
+	findings := make(chan *CrawlFinding)
+	wait := make(chan bool)
+
+	go func() {
+		for _ = range findings {
+		}
+		wait <- true
+	}()
+
+	iaSet := make(map[string]bool)
+	ia := func(r Resource) {
+		iaSet[r.String()] = true
+	}
+
+	r := &Resource{&Host{"localhost", "70"}, DirectoryType, "/"}
+	err := ResourceCrawler(mockResourceOpener, r, findings, &ia)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	close(findings)
+	<-wait
+
+	expected := []string{
+		"gopher://localhost:70/1",
+		"gopher://localhost:70/2file",
+		"gopher://example.com:72/1/directory",
+	}
+
+	for _, e := range expected {
+		if !iaSet[e] {
+			t.Errorf("Item action result %q not found in %#v", e, iaSet)
+		}
+	}
+
+	if len(iaSet) > len(expected) {
+		t.Fatalf("Too many item action results: %v", iaSet)
 	}
 }
 

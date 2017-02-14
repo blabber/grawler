@@ -122,7 +122,7 @@ func main() {
 				}
 
 				log.Printf("[%d] Crawling %v", i, j)
-				err := grawler.ResourceCrawler(grawler.NetResourceOpener, j, findings)
+				err := grawler.ResourceCrawler(grawler.NetResourceOpener, j, findings, nil)
 				if err != nil {
 					log.Printf("[%d] ERR: %v", i, err)
 				}

@@ -22,6 +22,8 @@ type ItemType byte
 
 // DirectoryType is the ItemType to describe a directory.
 const DirectoryType ItemType = '1'
+const InformationalMessageType ItemType = 'i'
+const ErrorMessageType ItemType = '3'
 
 // String returns the string representation of the ItemType
 func (t ItemType) String() string {
@@ -167,7 +169,10 @@ func NetResourceOpener(r *Resource) (io.ReadCloser, error) {
 // to a a Resource r that is expected to be of type DirectoryType. It then looks
 // for references to other directories and reports its findings via the out
 // channel.
-func ResourceCrawler(o ResourceOpener, r *Resource, out chan<- *CrawlFinding) error {
+//
+// If ia is not null it points to a function that is called for every Resource in the
+// directory that is not a InformationalMessageType or ErrorMessageType.
+func ResourceCrawler(o ResourceOpener, r *Resource, out chan<- *CrawlFinding, ia *func(Resource)) error {
 	if r.Type != DirectoryType {
 		return fmt.Errorf("Resource is not a directory: %v", r)
 	}
@@ -188,6 +193,12 @@ func ResourceCrawler(o ResourceOpener, r *Resource, out chan<- *CrawlFinding) er
 		res, err := NewResourceFromGopherLine(scan.Text())
 		if err != nil {
 			return err
+		}
+
+		if res.Type != InformationalMessageType && res.Type != ErrorMessageType {
+			if ia != nil {
+				(*ia)(*res)
+			}
 		}
 
 		if res.Type == DirectoryType {
