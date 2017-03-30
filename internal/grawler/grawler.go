@@ -105,13 +105,29 @@ func NewResourceFromGopherLine(line string) (*Resource, error) {
 
 // String returns a URI string representation of a Resource. If the selector
 // string is "/" it is replaced by an empty string.
+// If for some reason the URI string could not be assembled an empty string is
+// returned.
 func (r *Resource) String() string {
+	s, _ := r.TryString()
+
+	return s
+}
+
+// TryString returns a URI string representation of a Resource. If the selector
+// string is "/" it is replaced by an empty string.
+// If for some reason the URI string could not be assembled an empty string and
+// a corresponding error is returned.
+func (r *Resource) TryString() (string, error) {
 	s := r.Selector
 	if s == "/" {
 		s = ""
 	}
-	u, _ := url.Parse(fmt.Sprintf("gopher://%v/%v%s", r.Host, r.Type, s))
-	return u.String()
+	u, err := url.Parse(fmt.Sprintf("gopher://%v/%v%s", r.Host, r.Type, s))
+	if err != nil {
+		return "", err
+	}
+
+	return u.String(), nil
 }
 
 // CrawlFinding represents a reference to another Resource found by a crawler,

@@ -81,8 +81,15 @@ func main() {
 		var mtx sync.Mutex
 		itemActions = append(itemActions, func(r grawler.Resource) {
 			mtx.Lock()
-			fmt.Fprintf(f, "%s\n", r.String())
-			mtx.Unlock()
+			defer mtx.Unlock()
+
+			s, err := r.TryString()
+			if err != nil {
+				log.Printf("[ia] ERR: %v", err)
+				return
+			}
+
+			fmt.Fprintf(f, "%s\n", s)
 		})
 	}
 
