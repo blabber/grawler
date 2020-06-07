@@ -4,6 +4,19 @@ grawler
 A gopherspace crawler
 ---------------------
 
+### Project status
+
+This project is not maintained any more. If you are interested in it, ping me
+and I will transfer maintainership/ownership of this project to you.
+
+In the current state this software should not be used, as it is not a well
+behaving crawler:
+
+* It ignores any `robots.txt` that gopher holes might be providing to restrict
+  crawling
+* It also does not attempt to reduce the load on the gopher servers, which
+  often run on restricted resources, by spreading the requests over time
+
 ### What is it?
 
 `grawler` is a gopherspace crawler crawling all servers reachable (direct or
